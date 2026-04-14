@@ -51,6 +51,7 @@ body::after {
 .text-gradient {
     background: var(--gradient-brand);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -178,4 +179,49 @@ body::after {
 .glass-metric:hover {
     transform: translateX(-5px);
     border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Custom Dropdown */
+.dropdown-toggle-hide::after {
+    display: none !important;
+}
+
+.glass-dropdown {
+    background: rgba(24, 24, 27, 0.85) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dropdown-item-custom {
+    transition: all 0.2s ease;
+    color: #a1a1aa !important;
+}
+
+.dropdown-item-custom:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+.dropdown-item-custom-danger {
+    transition: all 0.2s ease;
+}
+
+.dropdown-item-custom-danger:hover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}
+
+/* Footer */
+.glass-footer {
+    background: rgba(9, 9, 11, 0.7) !important;
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hover-primary {
+    transition: color 0.3s ease;
+}
+
+.hover-primary:hover {
+    color: var(--bs-primary) !important;
 }

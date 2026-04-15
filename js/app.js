@@ -38,6 +38,11 @@ class App {
     }
 
     navigate(view) {
+        // Los técnicos no pueden crear reportes
+        if (view === 'report' && this.currentUser && this.currentUser.role === 'tecnico') {
+            return this.navigate('dashboard');
+        }
+
         const navEl = document.getElementById('main-nav');
         const footerEl = document.getElementById('main-footer');
         const contentContainer = document.getElementById('app-content');
@@ -93,6 +98,16 @@ class App {
             if (view === 'dashboard') {
                 this.renderIncidents();
                 setTimeout(() => this.updateDashboardStats(), 50); // Moficar estadísticas post-render
+                
+                // Ocultar botones de filtros si es alumno
+                const filterBtns = document.getElementById('filter-buttons');
+                if (filterBtns) {
+                    if (this.currentUser && this.currentUser.role === 'alumno') {
+                        filterBtns.classList.add('d-none');
+                    } else {
+                        filterBtns.classList.remove('d-none');
+                    }
+                }
             }
 
             // Animación suave de scroll to top al cambiar de vista
@@ -108,10 +123,16 @@ class App {
             'clean': { count: 0 }
         };
 
-        let total = this.incidents.length;
+        // Alumnos solo ven estadísticas de sus propios reportes
+        let baseList = this.incidents;
+        if (this.currentUser && this.currentUser.role === 'alumno') {
+            baseList = this.incidents.filter(inc => inc.author === this.currentUser.email);
+        }
+
+        let total = baseList.length;
         if(total === 0) total = 1; // prevent div bypass
 
-        this.incidents.forEach(inc => {
+        baseList.forEach(inc => {
             const cat = inc.category.toLowerCase();
             if(cat.includes('infra')) stats['infra'].count++;
             else if(cat.includes('tecnología') || cat.includes('tecnologia') || cat.includes('tech')) stats['tech'].count++;
@@ -145,7 +166,12 @@ class App {
         const grid = document.getElementById('incidents-grid');
         if (!grid) return;
 
-        const filtered = this.incidents.filter(inc => 
+        let baseList = this.incidents;
+        if (this.currentUser && this.currentUser.role === 'alumno') {
+            baseList = this.incidents.filter(inc => inc.author === this.currentUser.email);
+        }
+
+        const filtered = baseList.filter(inc => 
             inc.title.toLowerCase().includes(query) || 
             inc.location.toLowerCase().includes(query) ||
             inc.category.toLowerCase().includes(query)
@@ -161,7 +187,12 @@ class App {
         const searchInput = document.getElementById('search-input');
         if(searchInput) searchInput.value = '';
 
-        this.renderIncidentList(this.incidents, grid);
+        let baseList = this.incidents;
+        if (this.currentUser && this.currentUser.role === 'alumno') {
+            baseList = this.incidents.filter(inc => inc.author === this.currentUser.email);
+        }
+
+        this.renderIncidentList(baseList, grid);
     }
 
     renderIncidentList(list, grid) {
@@ -190,8 +221,8 @@ class App {
 
             let buttonsHtml = `<button class="btn btn-sm btn-outline-light rounded-pill px-3 mt-3 w-100" onclick="app.openIncidentDetails('${inc.id}')">Ver Detalles y Comentarios</button>`;
 
-            // Escalar: si es el autor y no es alta
-            if(this.currentUser && this.currentUser.email === inc.author && inc.urgency !== 'alta') {
+            // Escalar: solo los profesores pueden hacerlo y si no es alta
+            if(this.currentUser && this.currentUser.role === 'profesor' && inc.urgency !== 'alta') {
                buttonsHtml += `<button class="btn btn-sm btn-warning bg-opacity-10 text-warning rounded-pill px-3 mt-2 w-100 border border-warning border-opacity-25 fw-medium" onclick="app.escalateIncident('${inc.id}')"><i class="ph ph-fire"></i> Escalar Urgencia a Alta</button>`;
             }
 

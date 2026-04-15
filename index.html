@@ -19,7 +19,7 @@
     <div id="noise-overlay"></div>
 
     <!-- Navbar Bootstrap -->
-    <nav class="navbar navbar-expand-lg fixed-top glass-navbar py-3">
+    <nav id="main-nav" class="navbar navbar-expand-lg fixed-top glass-navbar py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-light" href="#"
                 onclick="app.navigate('dashboard')" role="button">
@@ -32,7 +32,7 @@
                     class="nav-links bg-black bg-opacity-25 rounded-pill p-1 border border-secondary border-opacity-25 d-none d-md-flex">
                     <button class="btn btn-sm nav-btn active rounded-pill px-3 fw-medium text-light shadow-none"
                         data-target="dashboard" onclick="app.navigate('dashboard')">Panel</button>
-                    <button class="btn btn-sm nav-btn rounded-pill px-3 fw-medium text-secondary shadow-none"
+                    <button id="nav-btn-report" class="btn btn-sm nav-btn rounded-pill px-3 fw-medium text-secondary shadow-none"
                         data-target="report" onclick="app.navigate('report')">Nueva Incidencia</button>
                 </div>
                 <!-- Perfil Dropdown -->
@@ -43,11 +43,11 @@
                             style="transition: border-color 0.3s ease;">
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end glass-dropdown mt-2 border-0 shadow-lg" aria-labelledby="dropdownUser">
-                        <li><h6 class="dropdown-header text-light fw-bold">Usuario Estudiante</h6></li>
+                        <li><h6 id="nav-user-name" class="dropdown-header text-light fw-bold">Usuario Estudiante</h6></li>
                         <li><a class="dropdown-item text-secondary py-2 dropdown-item-custom" href="#"><i class="ph ph-user me-2"></i> Mi Perfil</a></li>
                         <li><a class="dropdown-item text-secondary py-2 dropdown-item-custom" href="#"><i class="ph ph-gear me-2"></i> Configuración</a></li>
                         <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
-                        <li><a class="dropdown-item text-danger py-2 dropdown-item-custom-danger" href="#"><i class="ph ph-sign-out me-2"></i> Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item text-danger py-2 dropdown-item-custom-danger" href="#" onclick="app.logout(); return false;"><i class="ph ph-sign-out me-2"></i> Cerrar Sesión</a></li>
                     </ul>
                 </div>
             </div>
@@ -58,7 +58,7 @@
     <main id="app-content" class="container flex-grow-1" style="padding-top: 110px; padding-bottom: 4rem;"></main>
 
     <!-- Footer Institucional -->
-    <footer class="glass-footer py-4 mt-auto">
+    <footer id="main-footer" class="glass-footer py-4 mt-auto">
         <div class="container text-center text-md-start">
             <div class="row align-items-center g-3">
                 <div class="col-md-4">
@@ -80,6 +80,40 @@
     </footer>
 
     <!-- ==== Plantillas DOM ==== -->
+    <template id="tmpl-login">
+        <div class="login-view view-fade-in d-flex align-items-center justify-content-center w-100" style="min-height: calc(100vh - 4rem);">
+            <div class="glass-card p-5 rounded-4 shadow-lg" style="width: 100%; max-width: 420px; text-align: center;">
+                <i class="ph ph-shield-check text-primary mb-3" style="font-size: 4rem;"></i>
+                <h2 class="fw-bold text-light mb-1">UniSafe</h2>
+                <p class="text-secondary mb-4 pb-2">Inicia sesión con tu correo universitario</p>
+                
+                <form id="login-form" onsubmit="app.handleLogin(event)">
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-light small fw-medium">Correo Electrónico</label>
+                        <div class="position-relative">
+                            <i class="ph ph-envelope-simple position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5"></i>
+                            <input type="email" class="form-control custom-input text-light border-secondary border-opacity-25" style="padding-left: 2.8rem !important;" placeholder="usuario@universidad.edu" required>
+                        </div>
+                    </div>
+                    <div class="mb-4 text-start">
+                        <label class="form-label text-light small fw-medium">Contraseña</label>
+                        <div class="position-relative">
+                            <i class="ph ph-lock-key position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5" style="pointer-events: none;"></i>
+                            <input type="password" class="form-control custom-input text-light border-secondary border-opacity-25" id="login-password" style="padding-left: 2.8rem !important; padding-right: 2.8rem !important;" placeholder="••••••••" required>
+                            <button type="button" class="btn btn-link position-absolute top-50 translate-middle-y text-secondary p-0 text-decoration-none" style="right: 1rem; box-shadow: none;" onclick="app.togglePassword(this)">
+                                <i class="ph ph-eye fs-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 custom-btn-primary fw-bold mb-3 mt-2 fs-5">
+                        Ingresar <i class="ph ph-arrow-right ms-1"></i>
+                    </button>
+                    <a href="#" class="text-secondary small text-decoration-none hover-primary">¿Olvidaste tu contraseña?</a>
+                </form>
+            </div>
+        </div>
+    </template>
+
     <template id="tmpl-dashboard">
         <div class="dashboard view-fade-in">
             <!-- Hero -->
@@ -282,6 +316,66 @@
             </button>
         </div>
     </template>
+
+    <!-- Modal Incidentes (Roles Avanzados) -->
+    <div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card border-secondary border-opacity-25 shadow-lg bg-dark text-light border-0" style="backdrop-filter: blur(20px);">
+                <div class="modal-header border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="modal-status-badge" class="badge bg-secondary fs-6 rounded-pill px-3">Pendiente</span>
+                        <h5 class="modal-title fw-bold mb-0 ms-2" id="incidentModalLabel">ID</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4 px-4">
+                    <div class="row g-4">
+                        <div class="col-lg-7 border-end-lg border-secondary border-opacity-25 pe-lg-4">
+                            <h6 class="text-secondary small fw-medium mb-1 text-uppercase tracking-wide"><i class="ph ph-text-align-left"></i> Problema Reportado</h6>
+                            <p id="modal-title" class="fs-5 fw-semibold mb-4 text-light" style="line-height: 1.4;">Cargando...</p>
+                            
+                            <div class="d-flex flex-wrap gap-4 mb-4 bg-black bg-opacity-25 p-3 rounded-3">
+                                <div>
+                                    <h6 class="text-secondary small fw-medium mb-1"><i class="ph ph-user"></i> Autor</h6>
+                                    <p id="modal-author" class="fs-6 mb-0 fw-medium">...</p>
+                                </div>
+                                <div class="vr bg-secondary opacity-25"></div>
+                                <div>
+                                    <h6 class="text-secondary small fw-medium mb-1"><i class="ph ph-map-pin"></i> Ubicación</h6>
+                                    <p id="modal-location" class="fs-6 mb-0 fw-medium">...</p>
+                                </div>
+                            </div>
+
+                            <h6 class="text-secondary small fw-medium mb-3 text-uppercase tracking-wide"><i class="ph ph-chat-circle"></i> Mensajes e Historial</h6>
+                            <div id="modal-comments" class="d-flex flex-column gap-3 mb-3 p-3 rounded-3 bg-black bg-opacity-25 border border-secondary border-opacity-10" style="min-height: 120px; max-height: 250px; overflow-y: auto;">
+                                <!-- Comentarios -->
+                                <div class="text-center text-secondary small py-3" id="modal-no-comments">No hay mensajes del técnico todavía.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 ps-lg-4" id="tech-controls">
+                            <div class="bg-primary bg-opacity-10 border border-primary border-opacity-25 p-4 rounded-4 h-100">
+                                <h6 class="text-primary fw-bold mb-3"><i class="ph ph-wrench"></i> Panel de Técnico</h6>
+                                
+                                <label class="form-label small text-light fw-medium">Cambiar Estado</label>
+                                <select id="modal-select-status" class="form-select form-select-sm custom-input text-light mb-3">
+                                    <option value="pendiente">🕒 Pendiente</option>
+                                    <option value="en_proceso">⚙️ En Proceso</option>
+                                    <option value="resuelta">✅ Resuelta</option>
+                                </select>
+
+                                <label class="form-label small text-light fw-medium mt-2">Agregar Respuesta / Notificación</label>
+                                <textarea id="modal-new-comment" class="form-control form-control-sm custom-input text-light mb-4" rows="4" placeholder="Estimado usuario, estamos revisando el caso..."></textarea>
+                                
+                                <button id="btn-save-tech" class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100 rounded-3 custom-btn-primary fw-medium py-2" onclick="app.updateIncidentAdmin()">
+                                    <i class="ph ph-floppy-disk fs-5"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

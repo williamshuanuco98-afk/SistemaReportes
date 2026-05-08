@@ -11,7 +11,7 @@ const initialIncidents = [];
 class App {
     constructor() {
         this.contentContainer = document.getElementById('app-content');
-        
+
         // Cargar incidentes
         const storedIncidents = localStorage.getItem('universityIncidents_v2');
         if (storedIncidents) {
@@ -46,27 +46,27 @@ class App {
         const navEl = document.getElementById('main-nav');
         const footerEl = document.getElementById('main-footer');
         const contentContainer = document.getElementById('app-content');
-        
+
         // Controlar visibilidad del nav y footer en pantalla de login
         if (view === 'login') {
-            if(navEl) navEl.classList.add('d-none');
-            if(footerEl) footerEl.classList.add('d-none');
-            if(contentContainer) contentContainer.style.paddingTop = '0';
+            if (navEl) navEl.classList.add('d-none');
+            if (footerEl) footerEl.classList.add('d-none');
+            if (contentContainer) contentContainer.style.paddingTop = '0';
         } else {
-            if(navEl) navEl.classList.remove('d-none');
-            if(footerEl) footerEl.classList.remove('d-none');
-            if(contentContainer) contentContainer.style.paddingTop = '110px';
+            if (navEl) navEl.classList.remove('d-none');
+            if (footerEl) footerEl.classList.remove('d-none');
+            if (contentContainer) contentContainer.style.paddingTop = '110px';
         }
 
         // Actualizaciones específicas para usuarios logueados
         if (view !== 'login' && this.currentUser) {
             const userNameEl = document.getElementById('nav-user-name');
-            if(userNameEl) userNameEl.textContent = this.currentUser.name;
-            
+            if (userNameEl) userNameEl.textContent = this.currentUser.name;
+
             const btnReport = document.getElementById('nav-btn-report');
-            if(btnReport) {
+            if (btnReport) {
                 // Técnicos no hacen reportes
-                if(this.currentUser.role === 'tecnico') {
+                if (this.currentUser.role === 'tecnico') {
                     btnReport.classList.add('d-none');
                 } else {
                     btnReport.classList.remove('d-none');
@@ -98,7 +98,7 @@ class App {
             if (view === 'dashboard') {
                 this.renderIncidents();
                 setTimeout(() => this.updateDashboardStats(), 50); // Moficar estadísticas post-render
-                
+
                 // Ocultar botones de filtros si es alumno
                 const filterBtns = document.getElementById('filter-buttons');
                 if (filterBtns) {
@@ -130,38 +130,38 @@ class App {
         }
 
         let total = baseList.length;
-        if(total === 0) total = 1; // prevent div bypass
+        if (total === 0) total = 1; // prevent div bypass
 
         baseList.forEach(inc => {
             const cat = inc.category.toLowerCase();
-            if(cat.includes('infra')) stats['infra'].count++;
-            else if(cat.includes('tecnología') || cat.includes('tecnologia') || cat.includes('tech')) stats['tech'].count++;
-            else if(cat.includes('seguridad') || cat.includes('security')) stats['security'].count++;
-            else if(cat.includes('limpieza') || cat.includes('clean') || cat.includes('higiene')) stats['clean'].count++;
+            if (cat.includes('infra')) stats['infra'].count++;
+            else if (cat.includes('tecnología') || cat.includes('tecnologia') || cat.includes('tech')) stats['tech'].count++;
+            else if (cat.includes('seguridad') || cat.includes('security')) stats['security'].count++;
+            else if (cat.includes('limpieza') || cat.includes('clean') || cat.includes('higiene')) stats['clean'].count++;
         });
 
         // Actualizar barras en el DOM
         Object.keys(stats).forEach(key => {
             const count = stats[key].count;
             const pct = Math.round((count / total) * 100);
-            
+
             const pctEl = document.getElementById(`pct-${key}`);
             const barEl = document.getElementById(`bar-${key}`);
-            
-            if(pctEl && barEl) {
+
+            if (pctEl && barEl) {
                 pctEl.textContent = `${pct}%`;
                 barEl.style.width = `${pct}%`;
             }
         });
-        
+
         const totalEl = document.getElementById('total-incidents');
-        if(totalEl) totalEl.textContent = this.incidents.length;
+        if (totalEl) totalEl.textContent = this.incidents.length;
     }
 
     filterIncidents() {
         const input = document.getElementById('search-input');
-        if(!input) return;
-        
+        if (!input) return;
+
         const query = input.value.toLowerCase();
         const grid = document.getElementById('incidents-grid');
         if (!grid) return;
@@ -171,8 +171,8 @@ class App {
             baseList = this.incidents.filter(inc => inc.author === this.currentUser.email);
         }
 
-        const filtered = baseList.filter(inc => 
-            inc.title.toLowerCase().includes(query) || 
+        const filtered = baseList.filter(inc =>
+            inc.title.toLowerCase().includes(query) ||
             inc.location.toLowerCase().includes(query) ||
             inc.category.toLowerCase().includes(query)
         );
@@ -183,9 +183,9 @@ class App {
     renderIncidents() {
         const grid = document.getElementById('incidents-grid');
         if (!grid) return;
-        
+
         const searchInput = document.getElementById('search-input');
-        if(searchInput) searchInput.value = '';
+        if (searchInput) searchInput.value = '';
 
         let baseList = this.incidents;
         if (this.currentUser && this.currentUser.role === 'alumno') {
@@ -197,8 +197,8 @@ class App {
 
     renderIncidentList(list, grid) {
         grid.innerHTML = '';
-        
-        if(list.length === 0) {
+
+        if (list.length === 0) {
             grid.innerHTML = '<div class="col-12 text-center py-5"><i class="ph ph-magnifying-glass text-secondary display-4 mb-2"></i><h5 class="text-light">No se encontraron reportes</h5><p class="text-secondary">Prueba con otros términos.</p></div>';
             return;
         }
@@ -216,14 +216,14 @@ class App {
             // Etiqueta estado
             const st = inc.status || 'pendiente';
             let statusLabel = 'Pendiente', statusColor = 'text-secondary';
-            if(st === 'en_proceso') { statusLabel = 'En Proceso'; statusColor = 'text-info'; }
-            if(st === 'resuelta') { statusLabel = 'Resuelta'; statusColor = 'text-success'; }
+            if (st === 'en_proceso') { statusLabel = 'En Proceso'; statusColor = 'text-info'; }
+            if (st === 'resuelta') { statusLabel = 'Resuelta'; statusColor = 'text-success'; }
 
             let buttonsHtml = `<button class="btn btn-sm btn-outline-light rounded-pill px-3 mt-3 w-100" onclick="app.openIncidentDetails('${inc.id}')">Ver Detalles y Comentarios</button>`;
 
             // Escalar: solo los profesores pueden hacerlo y si no es alta
-            if(this.currentUser && this.currentUser.role === 'profesor' && inc.urgency !== 'alta') {
-               buttonsHtml += `<button class="btn btn-sm btn-warning bg-opacity-10 text-warning rounded-pill px-3 mt-2 w-100 border border-warning border-opacity-25 fw-medium" onclick="app.escalateIncident('${inc.id}')"><i class="ph ph-fire"></i> Escalar Urgencia a Alta</button>`;
+            if (this.currentUser && this.currentUser.role === 'profesor' && inc.urgency !== 'alta') {
+                buttonsHtml += `<button class="btn btn-sm btn-warning bg-opacity-10 text-warning rounded-pill px-3 mt-2 w-100 border border-warning border-opacity-25 fw-medium" onclick="app.escalateIncident('${inc.id}')"><i class="ph ph-fire"></i> Escalar Urgencia a Alta</button>`;
             }
 
             col.innerHTML = `
@@ -332,7 +332,7 @@ class App {
 
     escalateIncident(id) {
         const inc = this.incidents.find(i => i.id === id);
-        if(inc) {
+        if (inc) {
             inc.urgency = 'alta';
             this.saveIncidents();
             this.navigate('dashboard'); // re-render layout completo y barras stats
@@ -341,7 +341,7 @@ class App {
 
     openIncidentDetails(id) {
         const inc = this.incidents.find(i => i.id === id);
-        if(!inc) return;
+        if (!inc) return;
 
         this.currentViewedIncidentId = id;
 
@@ -349,15 +349,15 @@ class App {
         document.getElementById('modal-title').textContent = inc.title;
         document.getElementById('modal-author').textContent = inc.author || 'Anónimo';
         document.getElementById('modal-location').textContent = inc.location;
-        
+
         const badge = document.getElementById('modal-status-badge');
         const st = inc.status || 'pendiente';
-        if(st === 'en_proceso') { badge.className = 'badge bg-info bg-opacity-25 text-info fs-6 rounded-pill px-3 border border-info border-opacity-25'; badge.textContent = 'En Proceso'; }
-        else if(st === 'resuelta') { badge.className = 'badge bg-success bg-opacity-25 text-success fs-6 rounded-pill px-3 border border-success border-opacity-25'; badge.textContent = 'Resuelta'; }
+        if (st === 'en_proceso') { badge.className = 'badge bg-info bg-opacity-25 text-info fs-6 rounded-pill px-3 border border-info border-opacity-25'; badge.textContent = 'En Proceso'; }
+        else if (st === 'resuelta') { badge.className = 'badge bg-success bg-opacity-25 text-success fs-6 rounded-pill px-3 border border-success border-opacity-25'; badge.textContent = 'Resuelta'; }
         else { badge.className = 'badge bg-secondary bg-opacity-25 text-secondary fs-6 rounded-pill px-3 border border-secondary border-opacity-25'; badge.textContent = 'Pendiente'; }
 
         const commentsContainer = document.getElementById('modal-comments');
-        if(inc.comments && inc.comments.length > 0) {
+        if (inc.comments && inc.comments.length > 0) {
             commentsContainer.innerHTML = inc.comments.map(c => `
                 <div class="mb-2">
                     <span class="badge bg-primary bg-opacity-25 text-primary mb-2 border border-primary border-opacity-25">Mensaje del Técnico</span>
@@ -370,7 +370,7 @@ class App {
         }
 
         const techControls = document.getElementById('tech-controls');
-        if(this.currentUser && this.currentUser.role === 'tecnico') {
+        if (this.currentUser && this.currentUser.role === 'tecnico') {
             techControls.classList.remove('d-none');
             document.getElementById('modal-select-status').value = st;
             document.getElementById('modal-new-comment').value = '';
@@ -383,10 +383,10 @@ class App {
     }
 
     updateIncidentAdmin() {
-        if(!this.currentUser || this.currentUser.role !== 'tecnico') return;
-        
+        if (!this.currentUser || this.currentUser.role !== 'tecnico') return;
+
         const inc = this.incidents.find(i => i.id === this.currentViewedIncidentId);
-        if(!inc) return;
+        if (!inc) return;
 
         const statusVal = document.getElementById('modal-select-status').value;
         const newComment = document.getElementById('modal-new-comment').value.trim();
@@ -398,11 +398,11 @@ class App {
         }
 
         this.saveIncidents();
-        
+
         // Hide Modal
         const modalEl = document.getElementById('incidentModal');
         const modalObj = bootstrap.Modal.getInstance(modalEl);
-        if(modalObj) modalObj.hide();
+        if (modalObj) modalObj.hide();
 
         this.navigate('dashboard'); // Re-render table and stats
     }

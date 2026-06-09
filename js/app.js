@@ -1,4 +1,9 @@
-/* Cuentas Válidas Hardcodeadas */
+/* Configuración de API */
+const API_BASE = window.location.origin.startsWith("file://") || window.location.port !== "8080" 
+    ? "http://localhost:8080" 
+    : "";
+
+/* Cuentas Válidas Hardcodeadas (usadas como fallback o referencia local) */
 const validAccounts = {
     'u12345678@utp.edu.pe': { pass: 'u12345678', role: 'alumno', name: 'Alumno UTP' },
     'c12345@utp.edu.pe': { pass: 'c12345', role: 'profesor', name: 'Profesor UTP' },
@@ -8,42 +13,63 @@ const validAccounts = {
     'admin@utp.edu.pe': { pass: 'admin123', role: 'admin', name: 'Administrador del Sistema' }
 };
 
-/* Datos iniciales */
-const initialIncidents = [];
-
 class App {
     constructor() {
         this.contentContainer = document.getElementById('app-content');
-
-        // Cargar incidentes
-        const storedIncidents = localStorage.getItem('universityIncidents_v2');
-        if (storedIncidents) {
-            this.incidents = JSON.parse(storedIncidents);
-        } else {
-            this.incidents = [...initialIncidents];
-            this.saveIncidents();
-        }
+        this.incidents = [];
+        this.technicians = [];
+        this.activeFilter = 'all';
 
         // Cargar Usuario
         const storedUser = localStorage.getItem('currentUser');
         this.currentUser = storedUser ? JSON.parse(storedUser) : null;
-        
-        // Inicializar filtro de incidencias
-        this.activeFilter = 'all';
 
-        // Cargar vista inicial
+        // Cargar vista inicial y cargar datos si está logueado
         if (this.currentUser) {
-            this.navigate('dashboard');
+            this.loadIncidents().then(() => {
+                this.navigate('dashboard');
+            });
         } else {
             this.navigate('login');
         }
     }
 
-    saveIncidents() {
-        localStorage.setItem('universityIncidents_v2', JSON.stringify(this.incidents));
+    async loadIncidents() {
+        try {
+            const emailParam = this.currentUser ? `?userEmail=${encodeURIComponent(this.currentUser.email)}` : '';
+            const res = await fetch(`${API_BASE}/api/incidencias${emailParam}`);
+            if (res.ok) {
+                this.incidents = await res.json();
+            } else {
+                console.error("Error al cargar incidencias desde el servidor");
+                this.incidents = [];
+            }
+        } catch (err) {
+            console.error("Error de conexión al cargar incidencias:", err);
+            this.incidents = [];
+        }
     }
 
-    navigate(view) {
+    async loadTechnicians() {
+        try {
+            const res = await fetch(`${API_BASE}/api/usuarios/tecnicos`);
+            if (res.ok) {
+                this.technicians = await res.json();
+            } else {
+                console.error("Error al cargar técnicos");
+                this.technicians = [];
+            }
+        } catch (err) {
+            console.error("Error de conexión al cargar técnicos:", err);
+            this.technicians = [];
+        }
+    }
+
+    saveIncidents() {
+        // Obsoleto en la versión con base de datos, los datos se guardan en el servidor
+    }
+
+    async navigate(view) {
         // Redirigir a los administradores de dashboard a admin-dashboard
         if (view === 'dashboard' && this.currentUser && this.currentUser.role === 'admin') {
             return this.navigate('admin-dashboard');
@@ -107,8 +133,9 @@ class App {
 
             // Lógica específica de la vista activa
             if (view === 'dashboard') {
+                await this.loadIncidents();
                 this.renderIncidents();
-                setTimeout(() => this.updateDashboardStats(), 50); // Moficar estadísticas post-render
+                setTimeout(() => this.updateDashboardStats(), 50); // Modificar estadísticas post-render
 
                 // Ocultar botones de filtros si es alumno o técnico
                 const filterBtns = document.getElementById('filter-buttons');
@@ -120,7 +147,8 @@ class App {
                     }
                 }
             } else if (view === 'admin-dashboard') {
-                this.renderAdminDashboard();
+                await this.loadIncidents();
+                await this.renderAdminDashboard();
             }
 
             // Animación suave de scroll to top al cambiar de vista
@@ -257,12 +285,13 @@ class App {
 
             // Etiqueta urgencia
             let badgeClass = "text-bg-secondary";
-            if (inc.urgency === 'alta') badgeClass = "text-bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25";
-            if (inc.urgency === 'media') badgeClass = "text-bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25";
-            if (inc.urgency === 'baja') badgeClass = "text-bg-success bg-opacity-25 text-success border border-success border-opacity-25";
+            const urg = (inc.urgency || 'baja').toLowerCase();
+            if (urg === 'alta') badgeClass = "text-bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25";
+            if (urg === 'media') badgeClass = "text-bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25";
+            if (urg === 'baja') badgeClass = "text-bg-success bg-opacity-25 text-success border border-success border-opacity-25";
 
             // Etiqueta estado
-            const st = inc.status || 'pendiente';
+            const st = (inc.status || 'pendiente').toLowerCase();
             let statusLabel = 'Pendiente', statusColor = 'text-secondary';
             if (st === 'en_proceso') { statusLabel = 'En Proceso'; statusColor = 'text-info'; }
             if (st === 'resuelta') { statusLabel = 'Resuelta'; statusColor = 'text-success'; }
@@ -278,14 +307,14 @@ class App {
             let buttonsHtml = `<button class="btn btn-sm btn-outline-light rounded-pill px-3 mt-3 w-100" onclick="app.openIncidentDetails('${inc.id}')">Ver Detalles y Comentarios</button>`;
 
             // Escalar: solo los profesores pueden hacerlo y si no es alta
-            if (this.currentUser && this.currentUser.role === 'profesor' && inc.urgency !== 'alta') {
+            if (this.currentUser && this.currentUser.role === 'profesor' && urg !== 'alta') {
                 buttonsHtml += `<button class="btn btn-sm btn-warning bg-opacity-10 text-warning rounded-pill px-3 mt-2 w-100 border border-warning border-opacity-25 fw-medium" onclick="app.escalateIncident('${inc.id}')"><i class="ph ph-fire"></i> Escalar Urgencia a Alta</button>`;
             }
 
             col.innerHTML = `
-                <div class="card glass-card h-100 incident-card urgency-${inc.urgency} px-4 py-4 rounded-4 shadow-sm border-0" style="animation: fadeIn 0.4s ease forwards ${Math.min(index, 10) * 0.05}s; opacity: 0;">
+                <div class="card glass-card h-100 incident-card urgency-${urg} px-4 py-4 rounded-4 shadow-sm border-0" style="animation: fadeIn 0.4s ease forwards ${Math.min(index, 10) * 0.05}s; opacity: 0;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge rounded-pill ${badgeClass} px-3 py-2 text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">${inc.urgency}</span>
+                        <span class="badge rounded-pill ${badgeClass} px-3 py-2 text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">${urg}</span>
                         <span class="small fw-bold ${statusColor}"><i class="ph ph-circle-fill" style="font-size: 0.5rem; vertical-align: middle; margin-right: 4px;"></i> ${statusLabel}</span>
                     </div>
                     <div class="d-flex align-items-start gap-2.5 mb-2 mt-2">
@@ -304,7 +333,7 @@ class App {
         });
     }
 
-    handleLogin(e) {
+    async handleLogin(e) {
         e.preventDefault();
         const form = e.target;
         const btn = form.querySelector('button[type="submit"]');
@@ -314,19 +343,31 @@ class App {
         btn.innerHTML = '<i class="ph ph-spinner-gap ph-spin fs-5 mt-1 align-middle"></i> Autenticando...';
         btn.disabled = true;
 
-        setTimeout(() => {
-            if (validAccounts[email] && validAccounts[email].pass === pwd) {
-                const userObj = validAccounts[email];
-                this.currentUser = { email: email, role: userObj.role, name: userObj.name };
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: pwd })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                this.currentUser = { email: data.email, role: data.role.toLowerCase(), name: data.name };
                 localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                await this.loadIncidents();
                 this.navigate('dashboard');
                 form.reset();
             } else {
-                alert('Credenciales incorrectas o no reconocidas.');
+                const errMsg = await res.text();
+                alert('Credenciales incorrectas: ' + (errMsg || 'Inténtelo de nuevo.'));
             }
+        } catch (err) {
+            console.error("Error al iniciar sesión:", err);
+            alert('Error de conexión con el servidor.');
+        } finally {
             btn.innerHTML = 'Ingresar <i class="ph ph-arrow-right ms-1"></i>';
             btn.disabled = false;
-        }, 800);
+        }
     }
 
     togglePassword(btn) {
@@ -349,7 +390,7 @@ class App {
         this.navigate('login');
     }
 
-    submitReport(e) {
+    async submitReport(e) {
         e.preventDefault();
 
         const form = e.target;
@@ -358,45 +399,64 @@ class App {
         btn.innerHTML = '<i class="ph ph-spinner-gap ph-spin fs-5 mt-1"></i> Enviando Servidor...';
         btn.disabled = true;
 
-        setTimeout(() => {
+        try {
             const categorySelect = document.getElementById('category');
             const locationInput = document.getElementById('location');
             const urgencySelect = document.getElementById('urgency');
             const descInput = document.getElementById('description');
 
+            const categoryVal = categorySelect.value;
             const titleStr = categorySelect.options[categorySelect.selectedIndex].text + " registrado vía web en " + locationInput.value;
 
-            const newIncident = {
-                id: `INC-${Math.floor(Math.random() * 1000) + 300}`,
-                category: categorySelect.options[categorySelect.selectedIndex].text,
+            const requestBody = {
+                category: categoryVal,
                 location: locationInput.value,
                 urgency: urgencySelect.value,
-                date: "Justo ahora",
                 title: titleStr,
                 description: descInput.value,
-                author: this.currentUser.email,
-                status: 'pendiente',
-                comments: []
+                authorEmail: this.currentUser.email
             };
 
-            this.incidents.unshift(newIncident);
-            this.saveIncidents();
+            const res = await fetch(`${API_BASE}/api/incidencias`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
 
-            this.navigate('success');
+            if (res.ok) {
+                const createdIncident = await res.json();
+                await this.loadIncidents();
+                this.navigate('success');
 
-            const folioSpan = document.getElementById('folio-display');
-            if (folioSpan) folioSpan.textContent = newIncident.id;
-        }, 1200);
+                const folioSpan = document.getElementById('folio-display');
+                if (folioSpan) folioSpan.textContent = createdIncident.id;
+            } else {
+                const errMsg = await res.text();
+                alert('Error al registrar la incidencia: ' + errMsg);
+            }
+        } catch (err) {
+            console.error("Error al registrar reporte:", err);
+            alert('Error de conexión con el servidor.');
+        } finally {
+            btn.innerHTML = 'Registrar en Sistema <i class="ph ph-paper-plane-tilt ms-1"></i>';
+            btn.disabled = false;
+        }
     }
 
-    /* === Nuevas Acciones (Modales y Escalamiento) === */
-
-    escalateIncident(id) {
-        const inc = this.incidents.find(i => i.id === id);
-        if (inc) {
-            inc.urgency = 'alta';
-            this.saveIncidents();
-            this.navigate('dashboard'); // re-render layout completo y barras stats
+    async escalateIncident(id) {
+        try {
+            const res = await fetch(`${API_BASE}/api/incidencias/${id}/urgencia`, {
+                method: 'PUT'
+            });
+            if (res.ok) {
+                await this.loadIncidents();
+                this.navigate('dashboard');
+            } else {
+                alert('No se pudo escalar la urgencia en el servidor.');
+            }
+        } catch (err) {
+            console.error("Error al escalar incidencia:", err);
+            alert('Error de conexión con el servidor.');
         }
     }
 
@@ -412,7 +472,7 @@ class App {
         document.getElementById('modal-location').textContent = inc.location;
 
         const badge = document.getElementById('modal-status-badge');
-        const st = inc.status || 'pendiente';
+        const st = (inc.status || 'pendiente').toLowerCase();
         if (st === 'en_proceso') { badge.className = 'badge bg-info bg-opacity-25 text-info fs-6 rounded-pill px-3 border border-info border-opacity-25'; badge.textContent = 'En Proceso'; }
         else if (st === 'resuelta') { badge.className = 'badge bg-success bg-opacity-25 text-success fs-6 rounded-pill px-3 border border-success border-opacity-25'; badge.textContent = 'Resuelta'; }
         else { badge.className = 'badge bg-secondary bg-opacity-25 text-secondary fs-6 rounded-pill px-3 border border-secondary border-opacity-25'; badge.textContent = 'Pendiente'; }
@@ -422,11 +482,11 @@ class App {
             commentsContainer.innerHTML = inc.comments.map(c => {
                 const isAdmin = c.startsWith('[Administración] ');
                 const isTech = c.startsWith('[Técnico] ');
-                
+
                 let cleanComment = c;
                 let bubbleClass = 'chat-bubble-user';
                 let senderName = 'Usuario';
-                
+
                 if (isAdmin) {
                     cleanComment = c.replace('[Administración] ', '');
                     bubbleClass = 'chat-bubble-admin';
@@ -453,7 +513,7 @@ class App {
         const techControls = document.getElementById('tech-controls');
         if (this.currentUser && (this.currentUser.role === 'tecnico' || this.currentUser.role === 'admin')) {
             techControls.classList.remove('d-none');
-            
+
             // Personalizar el título según rol
             const panelTitle = techControls.querySelector('h6');
             if (panelTitle) {
@@ -461,7 +521,7 @@ class App {
                     ? '<i class="ph ph-shield-check"></i> Panel de Administración' 
                     : '<i class="ph ph-wrench"></i> Panel de Técnico';
             }
-            
+
             document.getElementById('modal-select-status').value = st;
             document.getElementById('modal-new-comment').value = '';
         } else {
@@ -472,44 +532,46 @@ class App {
         modal.show();
     }
 
-    updateIncidentAdmin() {
+    async updateIncidentAdmin() {
         if (!this.currentUser || (this.currentUser.role !== 'tecnico' && this.currentUser.role !== 'admin')) return;
-
-        const inc = this.incidents.find(i => i.id === this.currentViewedIncidentId);
-        if (!inc) return;
 
         const statusVal = document.getElementById('modal-select-status').value;
         const newComment = document.getElementById('modal-new-comment').value.trim();
 
-        inc.status = statusVal;
-        if (!inc.comments) inc.comments = [];
-        if (newComment !== '') {
-            const prefix = this.currentUser.role === 'admin' ? '[Administración] ' : '[Técnico] ';
-            inc.comments.push(prefix + newComment);
+        try {
+            const res = await fetch(`${API_BASE}/api/incidencias/${this.currentViewedIncidentId}/gestion`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: statusVal,
+                    comment: newComment,
+                    userEmail: this.currentUser.email
+                })
+            });
+
+            if (res.ok) {
+                // Ocultar Modal
+                const modalEl = document.getElementById('incidentModal');
+                const modalObj = bootstrap.Modal.getInstance(modalEl);
+                if (modalObj) modalObj.hide();
+
+                await this.loadIncidents();
+                this.navigate(this.currentUser.role === 'admin' ? 'admin-dashboard' : 'dashboard');
+            } else {
+                alert('No se pudo actualizar el estado de la incidencia.');
+            }
+        } catch (err) {
+            console.error("Error al actualizar gestión de incidencia:", err);
+            alert('Error de conexión con el servidor.');
         }
-
-        this.saveIncidents();
-
-        // Hide Modal
-        const modalEl = document.getElementById('incidentModal');
-        const modalObj = bootstrap.Modal.getInstance(modalEl);
-        if (modalObj) modalObj.hide();
-
-        this.navigate(this.currentUser.role === 'admin' ? 'admin-dashboard' : 'dashboard'); // Re-render table and stats
     }
-
-    /* === Funciones del Panel de Administración === */
 
     getTechnicians() {
-        return Object.keys(validAccounts)
-            .filter(email => validAccounts[email].role === 'tecnico')
-            .map(email => ({
-                email: email,
-                name: validAccounts[email].name
-            }));
+        return this.technicians || [];
     }
 
-    renderAdminDashboard() {
+    async renderAdminDashboard() {
+        await this.loadTechnicians();
         this.updateAdminDashboardStats();
         this.renderAdminIncidents();
         this.renderAdminTechnicians();
@@ -518,8 +580,8 @@ class App {
     updateAdminDashboardStats() {
         const total = this.incidents.length;
         const pending = this.incidents.filter(i => !i.assignedTo || i.assignedTo === '').length;
-        const process = this.incidents.filter(i => i.status === 'en_proceso').length;
-        const resolved = this.incidents.filter(i => i.status === 'resuelta').length;
+        const process = this.incidents.filter(i => (i.status || '').toLowerCase() === 'en_proceso').length;
+        const resolved = this.incidents.filter(i => (i.status || '').toLowerCase() === 'resuelta').length;
 
         const totalEl = document.getElementById('admin-stat-total');
         const pendingEl = document.getElementById('admin-stat-pending');
@@ -546,9 +608,10 @@ class App {
                 inc.title.toLowerCase().includes(query) ||
                 inc.location.toLowerCase().includes(query) ||
                 inc.category.toLowerCase().includes(query) ||
-                (inc.assignedTo && validAccounts[inc.assignedTo] && validAccounts[inc.assignedTo].name.toLowerCase().includes(query));
+                (inc.assignedTo && inc.assignedTo.toLowerCase().includes(query));
 
             let matchesStatus = true;
+            const st = (inc.status || '').toLowerCase();
             if (statusFilter === 'sin_asignar') {
                 matchesStatus = !inc.assignedTo;
             } else if (statusFilter === 'asignadas') {
@@ -556,7 +619,7 @@ class App {
             } else if (statusFilter === 'todas') {
                 matchesStatus = true;
             } else {
-                matchesStatus = inc.status === statusFilter;
+                matchesStatus = st === statusFilter;
             }
 
             return matchesText && matchesStatus;
@@ -592,16 +655,17 @@ class App {
 
         list.forEach(inc => {
             const tr = document.createElement('tr');
-            
+
             // Urgency Badge
             let urgencyBadge = '';
-            if (inc.urgency === 'alta') urgencyBadge = '<span class="badge text-bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold">Alta</span>';
-            else if (inc.urgency === 'media') urgencyBadge = '<span class="badge text-bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold">Media</span>';
+            const urg = (inc.urgency || '').toLowerCase();
+            if (urg === 'alta') urgencyBadge = '<span class="badge text-bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold">Alta</span>';
+            else if (urg === 'media') urgencyBadge = '<span class="badge text-bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold">Media</span>';
             else urgencyBadge = '<span class="badge text-bg-success bg-opacity-15 text-success border border-success border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold">Baja</span>';
 
             // Status Badge
             let statusBadge = '';
-            const st = inc.status || 'pendiente';
+            const st = (inc.status || 'pendiente').toLowerCase();
             if (st === 'en_proceso') statusBadge = '<span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold"><i class="ph ph-circle-fill me-1" style="font-size: 0.45rem;"></i> En Proceso</span>';
             else if (st === 'resuelta') statusBadge = '<span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold"><i class="ph ph-circle-fill me-1" style="font-size: 0.45rem;"></i> Resuelta</span>';
             else statusBadge = '<span class="badge bg-secondary bg-opacity-15 text-secondary border border-secondary border-opacity-25 py-1.5 px-3 rounded-pill fw-semibold"><i class="ph ph-circle-fill me-1" style="font-size: 0.45rem;"></i> Pendiente</span>';
@@ -644,8 +708,8 @@ class App {
         const technicians = this.getTechnicians();
 
         technicians.forEach(tech => {
-            const activeIncidents = this.incidents.filter(i => i.assignedTo === tech.email && i.status !== 'resuelta');
-            const resolvedIncidents = this.incidents.filter(i => i.assignedTo === tech.email && i.status === 'resuelta');
+            const activeIncidents = this.incidents.filter(i => i.assignedTo === tech.email && (i.status || '').toLowerCase() !== 'resuelta');
+            const resolvedIncidents = this.incidents.filter(i => i.assignedTo === tech.email && (i.status || '').toLowerCase() === 'resuelta');
 
             const activeCount = activeIncidents.length;
             const resolvedCount = resolvedIncidents.length;
@@ -675,25 +739,33 @@ class App {
                 </div>
                 <div class="d-flex align-items-center flex-wrap gap-2 mt-2 pt-2 border-top border-secondary border-opacity-10">
                     <span class="badge bg-black bg-opacity-50 border ${statusBadgeClass} rounded-pill px-2 py-1" style="font-size: 0.68rem; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                        <span class="workload-indicator" style="color: ${dotColor};"></span> ${statusLabel}
+                        <span class="workload-indicator" style="background-color: ${dotColor}; display: inline-block; width: 6px; height: 6px; border-radius: 50%;"></span> ${statusLabel}
                     </span>
-                    <span class="text-secondary small" style="font-size: 0.7rem; white-space: nowrap;">${activeCount} activas | ${resolvedCount} resueltas</span>
+                    <span class="text-secondary small" style="font-size: 0.75rem; white-space: nowrap;">${activeCount} activas | ${resolvedCount} resueltas</span>
                 </div>
             `;
             container.appendChild(item);
         });
     }
 
-    assignIncident(incidentId, technicianEmail) {
-        const inc = this.incidents.find(i => i.id === incidentId);
-        if (!inc) return;
+    async assignIncident(incidentId, technicianEmail) {
+        try {
+            const res = await fetch(`${API_BASE}/api/incidencias/${incidentId}/asignar?tecnicoEmail=${encodeURIComponent(technicianEmail)}`, {
+                method: 'PUT'
+            });
 
-        inc.assignedTo = technicianEmail;
-        this.saveIncidents();
-
-        this.updateAdminDashboardStats();
-        this.renderAdminTechnicians();
-        this.filterAdminIncidents();
+            if (res.ok) {
+                await this.loadIncidents();
+                this.updateAdminDashboardStats();
+                this.renderAdminTechnicians();
+                this.filterAdminIncidents();
+            } else {
+                alert('No se pudo asignar el técnico en el servidor.');
+            }
+        } catch (err) {
+            console.error("Error al asignar técnico:", err);
+            alert('Error de conexión con el servidor.');
+        }
     }
 }
 

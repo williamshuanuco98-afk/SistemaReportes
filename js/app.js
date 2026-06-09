@@ -84,8 +84,8 @@ class App {
         const footerEl = document.getElementById('main-footer');
         const contentContainer = document.getElementById('app-content');
 
-        // Controlar visibilidad del nav y footer en pantalla de login
-        if (view === 'login') {
+        // Controlar visibilidad del nav y footer en pantalla de login / register
+        if (view === 'login' || view === 'register') {
             if (navEl) navEl.classList.add('d-none');
             if (footerEl) footerEl.classList.add('d-none');
             if (contentContainer) contentContainer.style.paddingTop = '0';
@@ -96,7 +96,7 @@ class App {
         }
 
         // Actualizaciones específicas para usuarios logueados
-        if (view !== 'login' && this.currentUser) {
+        if (view !== 'login' && view !== 'register' && this.currentUser) {
             const userNameEl = document.getElementById('nav-user-name');
             if (userNameEl) userNameEl.textContent = this.currentUser.name;
 
@@ -366,6 +366,74 @@ class App {
             alert('Error de conexión con el servidor.');
         } finally {
             btn.innerHTML = 'Ingresar <i class="ph ph-arrow-right ms-1"></i>';
+            btn.disabled = false;
+        }
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        const form = e.target;
+        const btn = form.querySelector('button[type="submit"]');
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim().toLowerCase();
+        const pwd = document.getElementById('reg-password').value;
+        const confirmPwd = document.getElementById('reg-confirm-password').value;
+
+        // 1. Validar contraseñas
+        if (pwd !== confirmPwd) {
+            alert('Las contraseñas no coinciden.');
+            return;
+        }
+
+        // 2. Validar que termine en @utp.edu.pe
+        if (!email.endsWith('@utp.edu.pe')) {
+            alert('El correo debe pertenecer al dominio institucional (@utp.edu.pe)');
+            return;
+        }
+
+        // 3. Validar el formato local de UTP y deducir rol
+        const localPart = email.substring(0, email.indexOf('@'));
+        const isAlumno = /^u\d+$/.test(localPart);
+        const isProfesor = /^p\d{4}$/.test(localPart);
+        const isTecnico = /^t\d{4}$/.test(localPart);
+        const isAdmin = /^a\d{4}$/.test(localPart);
+
+        if (!isAlumno && !isProfesor && !isTecnico && !isAdmin) {
+            alert('Formato de correo no válido para asignación de rol.\n\n' +
+                  '- Estudiante: u[dígitos]\n' +
+                  '- Profesor: p[4 dígitos]\n' +
+                  '- Técnico: t[4 dígitos]\n' +
+                  '- Administrador: a[4 dígitos]');
+            return;
+        }
+
+        btn.innerHTML = '<i class="ph ph-spinner-gap ph-spin fs-5 mt-1 align-middle"></i> Registrando...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password: pwd })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                alert('¡Registro exitoso! Iniciando sesión automáticamente.');
+                this.currentUser = { email: data.email, role: data.role.toLowerCase(), name: data.name };
+                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                await this.loadIncidents();
+                this.navigate('dashboard');
+                form.reset();
+            } else {
+                const errMsg = await res.text();
+                alert('Error al registrarse: ' + (errMsg || 'Inténtelo de nuevo.'));
+            }
+        } catch (err) {
+            console.error("Error al registrar usuario:", err);
+            alert('Error de conexión con el servidor.');
+        } finally {
+            btn.innerHTML = 'Registrarse <i class="ph ph-user-plus ms-1"></i>';
             btn.disabled = false;
         }
     }

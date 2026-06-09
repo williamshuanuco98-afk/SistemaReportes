@@ -303,6 +303,108 @@
         </div>
     </template>
 
+    <template id="tmpl-admin-dashboard">
+        <div class="admin-dashboard view-fade-in">
+            <!-- Hero Header Admin -->
+            <div class="glass-card rounded-4 p-4 p-md-5 mb-5 position-relative overflow-hidden hero-section">
+                <div class="glow-blob"></div>
+                <div class="position-relative z-1 text-center text-md-start">
+                    <h1 class="fw-bold display-5 mb-2" style="letter-spacing: -0.02em;">Panel de <span class="text-gradient">Administración</span></h1>
+                    <p class="text-secondary fs-5 mb-0">Control central de incidencias, asignación de técnicos y monitoreo de actividades en tiempo real.</p>
+                </div>
+            </div>
+
+            <!-- Estadísticas Rápidas -->
+            <div class="row g-4 mb-5" id="admin-stats-container">
+                <div class="col-6 col-md-3">
+                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                        <i class="ph ph-file-text text-primary fs-2 mb-2 d-block"></i>
+                        <h3 class="fw-bold text-light mb-1" id="admin-stat-total">0</h3>
+                        <p class="text-secondary mb-0 small">Total Incidencias</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                        <i class="ph ph-clock-counter-clockwise text-warning fs-2 mb-2 d-block"></i>
+                        <h3 class="fw-bold text-light mb-1" id="admin-stat-pending">0</h3>
+                        <p class="text-secondary mb-0 small">Sin Asignar</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                        <i class="ph ph-spinner-gap ph-spin text-info fs-2 mb-2 d-block"></i>
+                        <h3 class="fw-bold text-light mb-1" id="admin-stat-process">0</h3>
+                        <p class="text-secondary mb-0 small">En Proceso</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                        <i class="ph ph-check-circle text-success fs-2 mb-2 d-block"></i>
+                        <h3 class="fw-bold text-light mb-1" id="admin-stat-resolved">0</h3>
+                        <p class="text-secondary mb-0 small">Resueltas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Columna Izquierda: Incidencias -->
+                <div class="col-lg-8">
+                    <div class="glass-card p-4 rounded-4 mb-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                            <h4 class="fw-bold text-light m-0 d-flex align-items-center gap-2">
+                                <i class="ph ph-list-bullets text-primary"></i> Control de Incidencias
+                            </h4>
+                            <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+                                <div class="position-relative">
+                                    <i class="ph ph-magnifying-glass position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5" style="z-index: 10;"></i>
+                                    <input type="text" class="form-control custom-input form-control-sm rounded-pill text-light py-2" id="admin-search-input" placeholder="Buscar..." onkeyup="app.filterAdminIncidents()" style="padding-left: 2.8rem !important; width: 100%; min-width: 180px;">
+                                </div>
+                                <select id="admin-filter-status" class="form-select custom-input form-select-sm text-light rounded-pill py-2" style="padding-left: 2.8rem !important; min-width: 150px;" onchange="app.filterAdminIncidents()">
+                                    <option value="todas">Todas</option>
+                                    <option value="sin_asignar">Sin Asignar</option>
+                                    <option value="asignadas">Asignadas</option>
+                                    <option value="pendiente">Pendientes</option>
+                                    <option value="en_proceso">En Proceso</option>
+                                    <option value="resuelta">Resueltas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle border-secondary border-opacity-25" id="admin-incidents-table">
+                                <thead>
+                                    <tr class="text-secondary small text-uppercase">
+                                        <th class="border-secondary border-opacity-25" style="width: 12%;">Folio</th>
+                                        <th class="border-secondary border-opacity-25" style="width: 38%;">Incidencia</th>
+                                        <th class="border-secondary border-opacity-25" style="width: 18%;">Ubicación</th>
+                                        <th class="border-secondary border-opacity-25" style="width: 15%;">Urgencia</th>
+                                        <th class="border-secondary border-opacity-25" style="width: 17%;">Estado</th>
+                                        <th class="border-secondary border-opacity-25" style="width: 25%;">Asignar Técnico</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-incidents-tbody">
+                                    <!-- Filas inyectadas por js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Técnicos -->
+                <div class="col-lg-4">
+                    <div class="glass-card p-4 rounded-4 mb-4">
+                        <h4 class="fw-bold text-light mb-4 d-flex align-items-center gap-2">
+                            <i class="ph ph-wrench text-primary"></i> Personal Técnico
+                        </h4>
+                        <div class="d-flex flex-column gap-3" id="admin-tech-list">
+                            <!-- Técnicos inyectados por js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <!-- Modal Incidentes (Roles Avanzados) -->
     <div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-lg">

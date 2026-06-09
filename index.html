@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Icons Phosphor -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link rel="stylesheet" href="./css/style.css?v=2">
+    <link rel="stylesheet" href="./css/style.css?v=3">
 </head>
 
 <body class="bg-dark text-light position-relative d-flex flex-column min-vh-100" style="overflow-x: hidden;">
@@ -24,30 +24,41 @@
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-light" href="#"
                 onclick="app.navigate('dashboard')" role="button">
                 <i class="ph ph-shield-check text-primary fs-2 m-0 p-0"></i>
-                <span style="font-size: 1.25rem;">UniSafe</span>
+                <span class="d-none d-sm-inline" style="font-size: 1.25rem; letter-spacing: -0.5px;">UniSafe</span>
             </a>
 
             <div class="d-flex align-items-center gap-3 ms-auto">
                 <div
-                    class="nav-links bg-black bg-opacity-25 rounded-pill p-1 border border-secondary border-opacity-25 d-none d-md-flex">
+                    class="nav-links bg-black bg-opacity-35 rounded-pill p-1 border border-secondary border-opacity-25 d-flex">
                     <button class="btn btn-sm nav-btn active rounded-pill px-3 fw-medium text-light shadow-none"
                         data-target="dashboard" onclick="app.navigate('dashboard')">Panel</button>
-                    <button id="nav-btn-report" class="btn btn-sm nav-btn rounded-pill px-3 fw-medium text-secondary shadow-none"
+                    <button id="nav-btn-report"
+                        class="btn btn-sm nav-btn rounded-pill px-3 fw-medium text-secondary shadow-none"
                         data-target="report" onclick="app.navigate('report')">Nueva Incidencia</button>
                 </div>
                 <!-- Perfil Dropdown -->
                 <div class="nav-profile dropdown">
-                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle-hide" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle-hide"
+                        id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="https://ui-avatars.com/api/?name=User&background=6f42c1&color=fff" alt="User Avatar"
                             class="rounded-circle border border-2 border-secondary" width="45" height="45"
                             style="transition: border-color 0.3s ease;">
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end glass-dropdown mt-2 border-0 shadow-lg" aria-labelledby="dropdownUser">
-                        <li><h6 id="nav-user-name" class="dropdown-header text-light fw-bold">Usuario Estudiante</h6></li>
-                        <li><a class="dropdown-item text-secondary py-2 dropdown-item-custom" href="#"><i class="ph ph-user me-2"></i> Mi Perfil</a></li>
-                        <li><a class="dropdown-item text-secondary py-2 dropdown-item-custom" href="#"><i class="ph ph-gear me-2"></i> Configuración</a></li>
-                        <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
-                        <li><a class="dropdown-item text-danger py-2 dropdown-item-custom-danger" href="#" onclick="app.logout(); return false;"><i class="ph ph-sign-out me-2"></i> Cerrar Sesión</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end glass-dropdown mt-2 border-0 shadow-lg"
+                        aria-labelledby="dropdownUser">
+                        <li>
+                            <h6 id="nav-user-name" class="dropdown-header text-light fw-bold">Usuario Estudiante</h6>
+                        </li>
+                        <li><a class="dropdown-item text-secondary py-2 dropdown-item-custom" href="#"><i
+                                    class="ph ph-user me-2"></i> Mi Perfil</a></li>
+                        <li><a class="dropdown-item text-secondary py-2 dropdown-item-custom" href="#"><i
+                                    class="ph ph-gear me-2"></i> Configuración</a></li>
+                        <li>
+                            <hr class="dropdown-divider border-secondary border-opacity-25">
+                        </li>
+                        <li><a class="dropdown-item text-danger py-2 dropdown-item-custom-danger" href="#"
+                                onclick="app.logout(); return false;"><i class="ph ph-sign-out me-2"></i> Cerrar
+                                Sesión</a></li>
                     </ul>
                 </div>
             </div>
@@ -68,7 +79,8 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-center">
-                    <p class="text-secondary small mb-0">&copy; 2026 Universidad Tecnológica del Peru. Todos los derechos reservados.</p>
+                    <p class="text-secondary small mb-0">&copy; 2026 Universidad Tecnológica del Peru. Todos los
+                        derechos reservados.</p>
                 </div>
                 <div class="col-md-4 d-flex gap-3 justify-content-center justify-content-md-end">
                     <a href="#" class="text-secondary hover-primary"><i class="ph ph-facebook-logo fs-5"></i></a>
@@ -81,34 +93,47 @@
 
     <!-- ==== Plantillas DOM ==== -->
     <template id="tmpl-login">
-        <div class="login-view view-fade-in d-flex align-items-center justify-content-center w-100" style="min-height: calc(100vh - 4rem);">
-            <div class="glass-card p-5 rounded-4 shadow-lg" style="width: 100%; max-width: 420px; text-align: center;">
+        <div class="login-view view-fade-in d-flex align-items-center justify-content-center w-100"
+            style="min-height: calc(100vh - 4rem);">
+            <div class="glass-card p-4 p-sm-5 rounded-4 shadow-lg" style="width: 100%; max-width: 420px; text-align: center;">
                 <i class="ph ph-shield-check text-primary mb-3" style="font-size: 4rem;"></i>
                 <h2 class="fw-bold text-light mb-1">UniSafe</h2>
                 <p class="text-secondary mb-4 pb-2">Inicia sesión con tu correo universitario</p>
-                
+
                 <form id="login-form" onsubmit="app.handleLogin(event)">
                     <div class="mb-3 text-start">
                         <label class="form-label text-light small fw-medium">Correo Electrónico</label>
                         <div class="position-relative">
-                            <i class="ph ph-envelope-simple position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5"></i>
-                            <input type="email" class="form-control custom-input text-light border-secondary border-opacity-25" style="padding-left: 2.8rem !important;" placeholder="usuario@universidad.edu" required>
+                            <i
+                                class="ph ph-envelope-simple position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5"></i>
+                            <input type="email"
+                                class="form-control custom-input text-light border-secondary border-opacity-25"
+                                style="padding-left: 2.8rem !important;" placeholder="usuario@universidad.edu" required>
                         </div>
                     </div>
                     <div class="mb-4 text-start">
                         <label class="form-label text-light small fw-medium">Contraseña</label>
                         <div class="position-relative">
-                            <i class="ph ph-lock-key position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5" style="pointer-events: none;"></i>
-                            <input type="password" class="form-control custom-input text-light border-secondary border-opacity-25" id="login-password" style="padding-left: 2.8rem !important; padding-right: 2.8rem !important;" placeholder="••••••••" required>
-                            <button type="button" class="btn btn-link position-absolute top-50 translate-middle-y text-secondary p-0 text-decoration-none" style="right: 1rem; box-shadow: none;" onclick="app.togglePassword(this)">
+                            <i class="ph ph-lock-key position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5"
+                                style="pointer-events: none;"></i>
+                            <input type="password"
+                                class="form-control custom-input text-light border-secondary border-opacity-25"
+                                id="login-password"
+                                style="padding-left: 2.8rem !important; padding-right: 2.8rem !important;"
+                                placeholder="••••••••" required>
+                            <button type="button"
+                                class="btn btn-link position-absolute top-50 translate-middle-y text-secondary p-0 text-decoration-none"
+                                style="right: 1rem; box-shadow: none;" onclick="app.togglePassword(this)">
                                 <i class="ph ph-eye fs-5"></i>
                             </button>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 custom-btn-primary fw-bold mb-3 mt-2 fs-5">
+                    <button type="submit"
+                        class="btn btn-primary w-100 py-3 rounded-3 custom-btn-primary fw-bold mb-3 mt-2 fs-5">
                         Ingresar <i class="ph ph-arrow-right ms-1"></i>
                     </button>
-                    <a href="#" class="text-secondary small text-decoration-none hover-primary">¿Olvidaste tu contraseña?</a>
+                    <a href="#" class="text-secondary small text-decoration-none hover-primary">¿Olvidaste tu
+                        contraseña?</a>
                 </form>
             </div>
         </div>
@@ -125,7 +150,8 @@
                         <h1 class="fw-bold display-5 mb-3" style="letter-spacing: -0.03em;">Mantenimiento del campus en
                             <span class="text-gradient">tiempo real</span>
                         </h1>
-                        <p class="text-secondary fs-5 mb-4 mx-auto" style="max-width: 600px;">Aplicación para reportar averías y problemas en tus
+                        <p class="text-secondary fs-5 mb-4 mx-auto" style="max-width: 600px;">Aplicación para reportar
+                            averías y problemas en tus
                             zonas universitarias. Participa para lograr un entorno más seguro y moderno.</p>
                         <button
                             class="btn btn-primary btn-lg rounded-3 gap-2 d-inline-flex align-items-center custom-btn-primary"
@@ -137,34 +163,78 @@
                 </div>
             </div>
 
-            <!-- Stats Visuales -->
+            <!-- Stats Visuales Rediseñadas -->
             <div class="row g-4 mb-5" id="stats-container">
                 <div class="col-12">
-                    <h5 class="fw-semibold text-light mb-3">Distribución de Incidencias</h5>
-                    <div class="glass-card p-4 rounded-4">
-                        <div class="row g-4">
-                            <div class="col-md-3">
-                                <div class="d-flex justify-content-between mb-1"><span class="text-secondary small fw-medium"><i class="ph ph-buildings me-1 text-primary"></i>Infraestructura</span><span class="text-light small fw-bold" id="pct-infra">0%</span></div>
-                                <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.05);">
-                                    <div class="progress-bar bg-primary rounded-pill progress-bar-animated progress-bar-striped" id="bar-infra" role="progressbar" style="width: 0%"></div>
+                    <h5 class="fw-semibold text-light mb-3 d-flex align-items-center gap-2">
+                        <i class="ph ph-chart-bar text-primary"></i> Estado General de Categorías
+                    </h5>
+                    <div class="row g-4">
+                        <!-- Infraestructura -->
+                        <div class="col-6 col-lg-3">
+                            <div class="card glass-card stat-card infra p-4 rounded-4 h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="stat-icon-wrapper">
+                                        <i class="ph ph-buildings"></i>
+                                    </div>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 text-uppercase fw-semibold" style="font-size: 0.7rem;" id="pct-infra">0%</span>
+                                </div>
+                                <h6 class="text-secondary small fw-medium mb-1">Infraestructura</h6>
+                                <h3 class="fw-bold text-light mb-3" id="count-infra">0</h3>
+                                <div class="progress" style="height: 5px; background-color: rgba(255,255,255,0.05);">
+                                    <div class="progress-bar bg-primary rounded-pill progress-bar-animated progress-bar-striped"
+                                        id="bar-infra" role="progressbar" style="width: 0%"></div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="d-flex justify-content-between mb-1"><span class="text-secondary small fw-medium"><i class="ph ph-laptop me-1 text-info"></i>Tecnología</span><span class="text-light small fw-bold" id="pct-tech">0%</span></div>
-                                <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.05);">
-                                    <div class="progress-bar bg-info rounded-pill progress-bar-animated progress-bar-striped" id="bar-tech" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <!-- Tecnología -->
+                        <div class="col-6 col-lg-3">
+                            <div class="card glass-card stat-card tech p-4 rounded-4 h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="stat-icon-wrapper">
+                                        <i class="ph ph-laptop"></i>
+                                    </div>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 text-uppercase fw-semibold" style="font-size: 0.7rem;" id="pct-tech">0%</span>
+                                </div>
+                                <h6 class="text-secondary small fw-medium mb-1">Tecnología y Redes</h6>
+                                <h3 class="fw-bold text-light mb-3" id="count-tech">0</h3>
+                                <div class="progress" style="height: 5px; background-color: rgba(255,255,255,0.05);">
+                                    <div class="progress-bar bg-info rounded-pill progress-bar-animated progress-bar-striped"
+                                        id="bar-tech" role="progressbar" style="width: 0%"></div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="d-flex justify-content-between mb-1"><span class="text-secondary small fw-medium"><i class="ph ph-shield-warning me-1 text-warning"></i>Seguridad</span><span class="text-light small fw-bold" id="pct-security">0%</span></div>
-                                <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.05);">
-                                    <div class="progress-bar bg-warning rounded-pill progress-bar-animated progress-bar-striped" id="bar-security" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <!-- Seguridad -->
+                        <div class="col-6 col-lg-3">
+                            <div class="card glass-card stat-card security p-4 rounded-4 h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="stat-icon-wrapper">
+                                        <i class="ph ph-shield-warning"></i>
+                                    </div>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 text-uppercase fw-semibold" style="font-size: 0.7rem;" id="pct-security">0%</span>
+                                </div>
+                                <h6 class="text-secondary small fw-medium mb-1">Seguridad Campus</h6>
+                                <h3 class="fw-bold text-light mb-3" id="count-security">0</h3>
+                                <div class="progress" style="height: 5px; background-color: rgba(255,255,255,0.05);">
+                                    <div class="progress-bar bg-warning rounded-pill progress-bar-animated progress-bar-striped"
+                                        id="bar-security" role="progressbar" style="width: 0%"></div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="d-flex justify-content-between mb-1"><span class="text-secondary small fw-medium"><i class="ph ph-sparkle me-1 text-success"></i>Limpieza</span><span class="text-light small fw-bold" id="pct-clean">0%</span></div>
-                                <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.05);">
-                                    <div class="progress-bar bg-success rounded-pill progress-bar-animated progress-bar-striped" id="bar-clean" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <!-- Limpieza -->
+                        <div class="col-6 col-lg-3">
+                            <div class="card glass-card stat-card clean p-4 rounded-4 h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="stat-icon-wrapper">
+                                        <i class="ph ph-sparkle"></i>
+                                    </div>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 text-uppercase fw-semibold" style="font-size: 0.7rem;" id="pct-clean">0%</span>
+                                </div>
+                                <h6 class="text-secondary small fw-medium mb-1">Higiene y Limpieza</h6>
+                                <h3 class="fw-bold text-light mb-3" id="count-clean">0</h3>
+                                <div class="progress" style="height: 5px; background-color: rgba(255,255,255,0.05);">
+                                    <div class="progress-bar bg-success rounded-pill progress-bar-animated progress-bar-striped"
+                                        id="bar-clean" role="progressbar" style="width: 0%"></div>
                                 </div>
                             </div>
                         </div>
@@ -175,17 +245,22 @@
             <!-- Listado -->
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
                 <h2 class="h4 fw-bold m-0 text-light d-flex align-items-center gap-2">
-                    Incidencias Recientes 
-                    <span class="badge bg-primary bg-opacity-25 text-primary rounded-pill fw-medium" style="font-size: 0.8rem;" id="total-incidents">0</span>
+                    Incidencias Recientes
+                    <span class="badge bg-primary bg-opacity-25 text-primary rounded-pill fw-semibold"
+                        style="font-size: 0.8rem;" id="total-incidents">0</span>
                 </h2>
                 <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center">
                     <div class="position-relative">
-                        <i class="ph ph-magnifying-glass position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5"></i>
-                        <input type="text" class="form-control custom-input form-control-sm rounded-pill text-light py-2" id="search-input" placeholder="Buscar por título..." onkeyup="app.filterIncidents()" style="padding-left: 2.8rem !important; width: 260px;">
+                        <i
+                            class="ph ph-magnifying-glass position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5"></i>
+                        <input type="text"
+                            class="form-control custom-input form-control-sm rounded-pill text-light py-2"
+                            id="search-input" placeholder="Buscar por título..." onkeyup="app.filterIncidents()"
+                            style="padding-left: 2.8rem !important; width: 260px;">
                     </div>
-                    <div class="btn-group" id="filter-buttons" role="group">
-                        <button type="button" class="btn btn-light btn-sm rounded-start-pill px-3 fw-medium">Todas</button>
-                        <button type="button" class="btn btn-outline-secondary text-light btn-sm rounded-end-pill px-3 fw-medium border-start-0" style="white-space: nowrap;">Mis reportes</button>
+                    <div class="segmented-control" id="filter-buttons">
+                        <button type="button" class="segmented-control-btn active" id="btn-filter-all" onclick="app.setIncidentFilter('all')">Todas</button>
+                        <button type="button" class="segmented-control-btn" id="btn-filter-my" onclick="app.setIncidentFilter('my')">Mis reportes</button>
                     </div>
                 </div>
             </div>
@@ -309,39 +384,41 @@
             <div class="glass-card rounded-4 p-4 p-md-5 mb-5 position-relative overflow-hidden hero-section">
                 <div class="glow-blob"></div>
                 <div class="position-relative z-1 text-center text-md-start">
-                    <h1 class="fw-bold display-5 mb-2" style="letter-spacing: -0.02em;">Panel de <span class="text-gradient">Administración</span></h1>
-                    <p class="text-secondary fs-5 mb-0">Control central de incidencias, asignación de técnicos y monitoreo de actividades en tiempo real.</p>
+                    <h1 class="fw-bold display-5 mb-2" style="letter-spacing: -0.02em;">Panel de <span
+                            class="text-gradient">Administración</span></h1>
+                    <p class="text-secondary fs-5 mb-0">Control central de incidencias, asignación de técnicos y
+                        monitoreo de actividades en tiempo real.</p>
                 </div>
             </div>
 
-            <!-- Estadísticas Rápidas -->
+            <!-- Estadísticas Rápidas Rediseñadas -->
             <div class="row g-4 mb-5" id="admin-stats-container">
                 <div class="col-6 col-md-3">
-                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                    <div class="glass-card admin-metric-card admin-metric-total p-4 rounded-4 text-center h-100">
                         <i class="ph ph-file-text text-primary fs-2 mb-2 d-block"></i>
                         <h3 class="fw-bold text-light mb-1" id="admin-stat-total">0</h3>
-                        <p class="text-secondary mb-0 small">Total Incidencias</p>
+                        <p class="text-secondary mb-0 small fw-medium">Total Incidencias</p>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                    <div class="glass-card admin-metric-card admin-metric-pending p-4 rounded-4 text-center h-100">
                         <i class="ph ph-clock-counter-clockwise text-warning fs-2 mb-2 d-block"></i>
                         <h3 class="fw-bold text-light mb-1" id="admin-stat-pending">0</h3>
-                        <p class="text-secondary mb-0 small">Sin Asignar</p>
+                        <p class="text-secondary mb-0 small fw-medium">Sin Asignar</p>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                    <div class="glass-card admin-metric-card admin-metric-process p-4 rounded-4 text-center h-100">
                         <i class="ph ph-spinner-gap ph-spin text-info fs-2 mb-2 d-block"></i>
                         <h3 class="fw-bold text-light mb-1" id="admin-stat-process">0</h3>
-                        <p class="text-secondary mb-0 small">En Proceso</p>
+                        <p class="text-secondary mb-0 small fw-medium">En Proceso</p>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="glass-card p-4 rounded-4 text-center h-100 glass-metric">
+                    <div class="glass-card admin-metric-card admin-metric-resolved p-4 rounded-4 text-center h-100">
                         <i class="ph ph-check-circle text-success fs-2 mb-2 d-block"></i>
                         <h3 class="fw-bold text-light mb-1" id="admin-stat-resolved">0</h3>
-                        <p class="text-secondary mb-0 small">Resueltas</p>
+                        <p class="text-secondary mb-0 small fw-medium">Resueltas</p>
                     </div>
                 </div>
             </div>
@@ -349,17 +426,26 @@
             <div class="row g-4">
                 <!-- Columna Izquierda: Incidencias -->
                 <div class="col-lg-8">
-                    <div class="glass-card p-4 rounded-4 mb-4">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                    <div class="glass-card p-3 p-sm-4 rounded-4 mb-4">
+                        <div
+                            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                             <h4 class="fw-bold text-light m-0 d-flex align-items-center gap-2">
                                 <i class="ph ph-list-bullets text-primary"></i> Control de Incidencias
                             </h4>
                             <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
                                 <div class="position-relative">
-                                    <i class="ph ph-magnifying-glass position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5" style="z-index: 10;"></i>
-                                    <input type="text" class="form-control custom-input form-control-sm rounded-pill text-light py-2" id="admin-search-input" placeholder="Buscar..." onkeyup="app.filterAdminIncidents()" style="padding-left: 2.8rem !important; width: 100%; min-width: 180px;">
+                                    <i class="ph ph-magnifying-glass position-absolute top-50 translate-middle-y text-secondary ms-3 fs-5"
+                                        style="z-index: 10;"></i>
+                                    <input type="text"
+                                        class="form-control custom-input form-control-sm rounded-pill text-light py-2"
+                                        id="admin-search-input" placeholder="Buscar..."
+                                        onkeyup="app.filterAdminIncidents()"
+                                        style="padding-left: 2.8rem !important; width: 100%; min-width: 180px;">
                                 </div>
-                                <select id="admin-filter-status" class="form-select custom-input form-select-sm text-light rounded-pill py-2" style="padding-left: 2.8rem !important; min-width: 150px;" onchange="app.filterAdminIncidents()">
+                                <select id="admin-filter-status"
+                                    class="form-select custom-input form-select-sm text-light rounded-pill py-2"
+                                    style="padding-left: 1.25rem !important; min-width: 150px;"
+                                    onchange="app.filterAdminIncidents()">
                                     <option value="todas">Todas</option>
                                     <option value="sin_asignar">Sin Asignar</option>
                                     <option value="asignadas">Asignadas</option>
@@ -370,29 +456,33 @@
                             </div>
                         </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover align-middle border-secondary border-opacity-25" id="admin-incidents-table">
-                                <thead>
+                        <div class="admin-table-container">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover align-middle border-0 admin-table"
+                                    id="admin-incidents-table">
+                                    <thead>
                                     <tr class="text-secondary small text-uppercase">
-                                        <th class="border-secondary border-opacity-25" style="width: 12%;">Folio</th>
-                                        <th class="border-secondary border-opacity-25" style="width: 38%;">Incidencia</th>
-                                        <th class="border-secondary border-opacity-25" style="width: 18%;">Ubicación</th>
-                                        <th class="border-secondary border-opacity-25" style="width: 15%;">Urgencia</th>
-                                        <th class="border-secondary border-opacity-25" style="width: 17%;">Estado</th>
-                                        <th class="border-secondary border-opacity-25" style="width: 25%;">Asignar Técnico</th>
+                                        <th style="width: 10%;">Folio</th>
+                                        <th style="width: 30%;">Incidencia</th>
+                                        <th style="width: 15%;">Ubicación</th>
+                                        <th style="width: 10%;">Urgencia</th>
+                                        <th style="width: 12%;">Estado</th>
+                                        <th style="width: 15%;">Asignar Técnico</th>
+                                        <th style="width: 8%; text-align: right;">Acciones</th>
                                     </tr>
-                                </thead>
-                                <tbody id="admin-incidents-tbody">
-                                    <!-- Filas inyectadas por js -->
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody id="admin-incidents-tbody">
+                                        <!-- Filas inyectadas por js -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Columna Derecha: Técnicos -->
                 <div class="col-lg-4">
-                    <div class="glass-card p-4 rounded-4 mb-4">
+                    <div class="glass-card p-3 p-sm-4 rounded-4 mb-4">
                         <h4 class="fw-bold text-light mb-4 d-flex align-items-center gap-2">
                             <i class="ph ph-wrench text-primary"></i> Personal Técnico
                         </h4>
@@ -406,55 +496,73 @@
     </template>
 
     <!-- Modal Incidentes (Roles Avanzados) -->
-    <div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true"
+        data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content glass-card border-secondary border-opacity-25 shadow-lg bg-dark text-light border-0" style="backdrop-filter: blur(20px);">
+            <div class="modal-content glass-card border-secondary border-opacity-25 shadow-lg bg-dark text-light border-0"
+                style="backdrop-filter: blur(25px); border-radius: 20px;">
                 <div class="modal-header border-secondary border-opacity-25 pb-3">
                     <div class="d-flex align-items-center gap-2">
                         <span id="modal-status-badge" class="badge bg-secondary fs-6 rounded-pill px-3">Pendiente</span>
-                        <h5 class="modal-title fw-bold mb-0 ms-2" id="incidentModalLabel">ID</h5>
+                        <h5 class="modal-title fw-bold mb-0 ms-2 text-gradient" id="incidentModalLabel">ID</h5>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
-                <div class="modal-body py-4 px-4">
+                <div class="modal-body py-3 px-3 py-sm-4 px-sm-4">
                     <div class="row g-4">
-                        <div class="col-lg-7 border-end-lg border-secondary border-opacity-25 pe-lg-4">
-                            <h6 class="text-secondary small fw-medium mb-1 text-uppercase tracking-wide"><i class="ph ph-text-align-left"></i> Problema Reportado</h6>
-                            <p id="modal-title" class="fs-5 fw-semibold mb-4 text-light" style="line-height: 1.4;">Cargando...</p>
-                            
-                            <div class="d-flex flex-wrap gap-4 mb-4 bg-black bg-opacity-25 p-3 rounded-3">
+                        <div class="col-lg-7 border-end-lg border-secondary border-opacity-25 pe-lg-4 d-flex flex-column">
+                            <h6 class="text-secondary small fw-bold mb-1 text-uppercase tracking-wider"><i
+                                    class="ph ph-text-align-left text-primary"></i> Problema Reportado</h6>
+                            <p id="modal-title" class="fs-5 fw-bold mb-4 text-light" style="line-height: 1.4;">
+                                Cargando...</p>
+
+                            <div class="d-flex flex-wrap gap-4 mb-4 bg-black bg-opacity-35 p-3 rounded-4 border border-secondary border-opacity-10">
                                 <div>
-                                    <h6 class="text-secondary small fw-medium mb-1"><i class="ph ph-user"></i> Autor</h6>
+                                    <h6 class="text-secondary small fw-bold mb-1"><i class="ph ph-user text-primary"></i> Autor</h6>
                                     <p id="modal-author" class="fs-6 mb-0 fw-medium">...</p>
                                 </div>
                                 <div class="vr bg-secondary opacity-25"></div>
                                 <div>
-                                    <h6 class="text-secondary small fw-medium mb-1"><i class="ph ph-map-pin"></i> Ubicación</h6>
+                                    <h6 class="text-secondary small fw-bold mb-1"><i class="ph ph-map-pin text-primary"></i> Ubicación</h6>
                                     <p id="modal-location" class="fs-6 mb-0 fw-medium">...</p>
                                 </div>
                             </div>
 
-                            <h6 class="text-secondary small fw-medium mb-3 text-uppercase tracking-wide"><i class="ph ph-chat-circle"></i> Mensajes e Historial</h6>
-                            <div id="modal-comments" class="d-flex flex-column gap-3 mb-3 p-3 rounded-3 bg-black bg-opacity-25 border border-secondary border-opacity-10" style="min-height: 120px; max-height: 250px; overflow-y: auto;">
+                            <h6 class="text-secondary small fw-bold mb-3 text-uppercase tracking-wider"><i
+                                    class="ph ph-chat-circle text-primary"></i> Mensajes e Historial</h6>
+                            <div id="modal-comments"
+                                class="d-flex flex-column gap-3 mb-3 p-3 rounded-4 bg-black bg-opacity-35 border border-secondary border-opacity-10"
+                                style="min-height: 150px; max-height: 280px; overflow-y: auto;">
                                 <!-- Comentarios -->
-                                <div class="text-center text-secondary small py-3" id="modal-no-comments">No hay mensajes del técnico todavía.</div>
+                                <div class="text-center text-secondary small py-3" id="modal-no-comments">No hay
+                                    mensajes del técnico todavía.</div>
                             </div>
                         </div>
                         <div class="col-lg-5 ps-lg-4" id="tech-controls">
-                            <div class="bg-primary bg-opacity-10 border border-primary border-opacity-25 p-4 rounded-4 h-100">
-                                <h6 class="text-primary fw-bold mb-3"><i class="ph ph-wrench"></i> Panel de Técnico</h6>
-                                
-                                <label class="form-label small text-light fw-medium">Cambiar Estado</label>
-                                <select id="modal-select-status" class="form-select form-select-sm custom-input text-light mb-3">
+                            <div
+                                class="bg-primary bg-opacity-10 border border-primary border-opacity-15 p-4 rounded-4 h-100 d-flex flex-column">
+                                <h6 class="text-primary fw-bold mb-3 d-flex align-items-center gap-2">
+                                    <i class="ph ph-shield-check"></i>
+                                    <span>Panel de Gestión</span>
+                                </h6>
+
+                                <label class="form-label small text-light fw-medium mb-1">Cambiar Estado</label>
+                                <select id="modal-select-status"
+                                    class="form-select form-select-sm custom-input text-light mb-3" style="padding-left: 1rem !important;">
                                     <option value="pendiente">🕒 Pendiente</option>
                                     <option value="en_proceso">⚙️ En Proceso</option>
                                     <option value="resuelta">✅ Resuelta</option>
                                 </select>
 
-                                <label class="form-label small text-light fw-medium mt-2">Agregar Respuesta / Notificación</label>
-                                <textarea id="modal-new-comment" class="form-control form-control-sm custom-input text-light mb-4" rows="4" placeholder="Estimado usuario, estamos revisando el caso..."></textarea>
-                                
-                                <button id="btn-save-tech" class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100 rounded-3 custom-btn-primary fw-medium py-2" onclick="app.updateIncidentAdmin()">
+                                <label class="form-label small text-light fw-medium mt-2 mb-1">Agregar Respuesta / Comentario</label>
+                                <textarea id="modal-new-comment"
+                                    class="form-control form-control-sm custom-input text-light mb-4" rows="4"
+                                    placeholder="Estimado usuario, estamos revisando el caso..." style="padding-left: 1rem !important;"></textarea>
+
+                                <button id="btn-save-tech"
+                                    class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100 rounded-3 custom-btn-primary fw-semibold py-2.5 mt-auto"
+                                    onclick="app.updateIncidentAdmin()">
                                     <i class="ph ph-floppy-disk fs-5"></i> Guardar Cambios
                                 </button>
                             </div>
@@ -467,7 +575,7 @@
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="./js/app.js?v=2"></script>
+    <script src="./js/app.js?v=3"></script>
 </body>
 
 </html>
